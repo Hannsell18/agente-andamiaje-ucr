@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Procedimiento del Investigador — Agente Socrático Embodied</title>
+    <style>
+        :root { --primary: #0F3B82; --primary-light: #2A5BAA; --bg-body: #F4F7F6; --bg-card: #FFFFFF; --text-main: #333333; --text-muted: #666666; --border-color: #E2E8F0; --radius: 8px; --shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.6; padding: 40px 20px; display: flex; justify-content: center; }
+        .container { max-width: 800px; width: 100%; }
+        .card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 40px; border: 1px solid var(--border-color); }
+        h1 { color: var(--primary); font-size: 1.8rem; margin-bottom: 8px; border-bottom: 2px solid var(--primary-light); padding-bottom: 10px; }
+        h2 { color: var(--primary-light); font-size: 1.3rem; margin-top: 30px; margin-bottom: 15px; }
+        h3 { color: var(--text-main); font-size: 1.1rem; margin-top: 20px; margin-bottom: 10px; }
+        p { margin-bottom: 15px; }
+        ul { margin-bottom: 15px; padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        .metadata-box { background-color: #F8FAFC; border-left: 4px solid var(--primary); padding: 15px; margin-bottom: 30px; border-radius: 0 var(--radius) var(--radius) 0; }
+        .metadata-box p { margin-bottom: 5px; font-size: 0.95rem; }
+        .metadata-box strong { color: var(--primary); }
+        .quote { background-color: #F1F5F9; font-style: italic; padding: 15px; border-radius: var(--radius); margin: 15px 0; color: #475569; }
+        .checkbox-list { list-style: none; padding-left: 0; }
+        .checkbox-list li { display: flex; align-items: flex-start; margin-bottom: 10px; }
+        .checkbox-list li::before { content: '☐'; font-size: 1.2rem; margin-right: 10px; color: var(--primary-light); line-height: 1.2; }
+        .warn { background-color: #FFF7ED; border-left: 4px solid #C2410C; padding: 12px 15px; margin: 15px 0; border-radius: 0 var(--radius) var(--radius) 0; font-size: 0.95rem; color: #7C2D12; }
+        .warn strong { color: #9A3412; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Guía de Procedimiento del Investigador</h1>
+            <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 25px;">Evaluación de un Agente Conversacional Socrático con y sin <em>Embodiment</em> (Sesión Única)</p>
+
+            <div class="metadata-box">
+                <p><strong>Estudio:</strong> Evaluación de la usabilidad, carga cognitiva y experiencia de usuario en la interacción con un agente conversacional socrático para programación introductoria, comparando una versión <em>embodied</em> (avatar, voz y comportamiento no verbal) frente a una versión en texto plano.</p>
+                <p><strong>Códigos de Proyecto:</strong> ECCI/CITIC 834-C5-207 · Curso de Agentes Virtuales, Posgrado en Computación e Informática [completar código de curso].</p>
+                <p><strong>Investigador Principal:</strong> Hansell Solís Ramírez, M.Sc. (c)</p>
+                <p><strong>Investigador(es):</strong> [Nombres del equipo de investigación, grado]</p>
+                <p><strong>Unidad Ejecutora:</strong> Escuela de Ciencias de la Computación e Informática (ECCI) — Centro de Investigaciones en Tecnologías de la Información y Comunicación (CITIC), Universidad de Costa Rica.</p>
+            </div>
+
+            <h2>1. Resumen del Estudio y Preparación</h2>
+            <p>Esta guía detalla el protocolo para evaluar la interacción de las personas participantes con un agente conversacional socrático en una sesión única y controlada en laboratorio. El estudio compara dos condiciones de un mismo agente —idéntica lógica pedagógica de andamiaje socrático— que difieren únicamente en su <em>embodiment</em>:</p>
+            <ul>
+                <li><strong>Condición A (experimental):</strong> agente socrático <em>embodied</em>, con avatar animado, comportamiento no verbal (mirada, gesto, expresión facial), voz sintetizada y capa de soporte relacional.</li>
+                <li><strong>Condición B (control):</strong> el mismo agente socrático en interfaz de texto plano, sin avatar, sin voz, sin comportamiento no verbal y sin capa relacional.</li>
+            </ul>
+
+            <h3>1.1 Checklist de Materiales</h3>
+            <ul class="checkbox-list">
+                <li>Copias impresas del Formulario de Consentimiento Informado, con autorización explícita para grabación de audio y registro de logs.</li>
+                <li>Estación de laboratorio configurada y probada con la versión correspondiente del agente (A o B) y con Python instalado.</li>
+                <li>Software de grabación de pantalla y audio verificado y en funcionamiento.</li>
+                <li>Audífonos con micrófono funcional y desinfectados (necesarios para la Condición A por la interacción de voz; opcionales en la Condición B).</li>
+                <li>Tabla de asignación aleatoria (Condición A / Condición B) y de IDs de participante.</li>
+                <li>Enlaces o tablet pre-cargados con los cuestionarios post-interacción (SUS, NASA-TLX, Godspeed, meCUE).</li>
+                <li>Enunciado impreso del ejercicio <em>¿Más positivos o negativos?</em> y encuesta pre-tarea.</li>
+                <li>Hoja de notas de observación (<em>drifting</em>) con marcas de tiempo.</li>
+                <li>Lista de participantes, registro de asistencia y AMPO (o archivo físico) para resguardar las hojas de consentimiento.</li>
+            </ul>
+
+            <div class="warn"><strong>Mitigación de sesgo de deseabilidad social:</strong> la persona investigadora que conduce la sesión NO debe ser la persona docente del grupo de la persona participante. Verifíquelo antes de iniciar.</div>
+
+            <h2>2. Inducción y Bienvenida</h2>
+
+            <h3>2.1 Consentimiento Informado</h3>
+            <p><strong>Saludo:</strong></p>
+            <div class="quote">"Hola _____, muchas gracias por venir. Mi nombre es _____. Yo seré la persona investigadora encargada de la sesión el día de hoy."</div>
+            <p><strong>Entrega del Consentimiento:</strong></p>
+            <div class="quote">"Vamos a leer juntos este consentimiento informado. Es muy importante que sepa que usted es libre de retirar su consentimiento y dejar de participar en este estudio en cualquier momento, sin ninguna consecuencia."</div>
+            <p><strong>Al terminar de leer (DECIRLO TEXTUAL — pregunta de aceptación obligatoria):</strong></p>
+            <div class="quote">"Después de leer el consentimiento, ¿todavía desea participar del estudio?"</div>
+            <p><strong>Si la respuesta es afirmativa:</strong> solicite el documento de identidad para verificar la mayoría de edad. Ambas personas firman dos copias del ejemplar. Entregue una copia a la persona participante. Registre el ID asignado en su bitácora. <strong>Si la respuesta es negativa:</strong> agradezca su tiempo, no inicie ningún registro y finalice la sesión sin consecuencia alguna.</p>
+
+            <h3>2.2 Asignación a la Condición de Estudio</h3>
+            <p>De acuerdo con la tabla de asignación aleatoria, determine la condición de la persona participante y prepare <strong>silenciosamente</strong> la versión correspondiente del agente, sin comentar a la persona participante qué versión recibirá ni que existen dos versiones:</p>
+            <ul>
+                <li><strong>Condición A:</strong> agente socrático <em>embodied</em> (avatar + voz + no verbal + soporte relacional).</li>
+                <li><strong>Condición B:</strong> agente socrático en texto plano (sin avatar, voz, no verbal ni capa relacional).</li>
+            </ul>
+            <p>Configure el <em>plugin</em> / la plataforma con el ID de la persona participante (P01, P02…) según la tabla preparada previamente.</p>
+
+            <h3>2.3 Cuestionario Inicial (pre-tarea)</h3>
+            <p>Solicite a la persona participante completar la encuesta pre-tarea de perfil (demográfico, experiencia previa con programación y con herramientas de IA). Inicie la grabación de audio en este momento y manténgala activa durante toda la sesión.</p>
+
+            <h2>3. Fase de Interacción en Laboratorio</h2>
+
+            <h3>3.1 Instrucciones y Prueba Técnica</h3>
+            <p><strong>Investigador(a) — instrucción neutra (Condición A):</strong></p>
+            <div class="quote">"A continuación va a resolver un ejercicio de programación en Python durante 35 minutos. Para ello podrá conversar con un asistente de inteligencia artificial integrado en la herramienta. Por favor, colóquese los audífonos."</div>
+            <p><strong>Investigador(a) — instrucción neutra (Condición B):</strong></p>
+            <div class="quote">"A continuación va a resolver un ejercicio de programación en Python durante 35 minutos. Para ello podrá consultar un asistente de inteligencia artificial integrado en la herramienta mediante el chat de texto."</div>
+            <p>En la Condición A, realice una prueba rápida de audio y de voz del avatar para confirmar que el micrófono capta correctamente y el volumen es adecuado.</p>
+            <div class="warn"><strong>Instrucciones neutras (control de <em>priming</em>):</strong> NO describa el asistente como "tutor", "socrático", "embodied" ni mencione que su propósito es no dar respuestas. NO sugiera cómo o cuándo usarlo. NO insinúe que existe una comparación entre versiones. Use siempre el término neutro "asistente de inteligencia artificial".</div>
+            <p><strong>Explicación de la tarea (idéntica para ambas condiciones):</strong></p>
+            <div class="quote">"El objetivo es resolver el ejercicio que aparece en la pantalla. Puede usar el asistente con la libertad que desee; también puede no usarlo. No está permitido usar otras herramientas de IA ni internet. Yo no puedo responder preguntas sobre el contenido del ejercicio. Trabaje con naturalidad; yo me ubicaré a un costado para no interrumpir. Cuando el tiempo termine, le indicaré los siguientes pasos. ¿Tiene alguna pregunta antes de comenzar?"</div>
+
+            <h3>3.2 Desarrollo de la Sesión (35 min) — Observación no intrusiva (<em>drifting</em>)</h3>
+            <p>La persona investigadora adopta una postura de no intervención: observa y registra comportamientos en la hoja de notas con marcas de tiempo, sin interactuar con la persona participante. La plataforma registra automáticamente todas las interacciones con el agente (prompts, respuestas, <em>timestamps</em>, código activo y cambios posteriores) bajo el ID de la persona participante.</p>
+
+            <h2>4. Cierre del Estudio y Recolección de Datos</h2>
+
+            <h3>4.1 Cuestionarios Post-Interacción</h3>
+            <p>Una vez transcurridos los 35 minutos (o al finalizar antes), la persona investigadora agradece a la persona participante y, en la Condición A, le pide retirarse los audífonos.</p>
+            <p><strong>Investigador(a):</strong></p>
+            <div class="quote">"¡Excelente! Ahora le pediré que complete una serie de cuestionarios cortos sobre su experiencia con el asistente."</div>
+            <p>Proporcione los enlaces o la tablet con los instrumentos, en el orden contrabalanceado asignado a esta persona participante:</p>
+            <ul>
+                <li><strong>SUS</strong> (System Usability Scale) — usabilidad percibida, ~3 min.</li>
+                <li><strong>NASA-TLX / Raw TLX</strong> — carga cognitiva (papel con escala numérica u oral según subgrupo), ~5 min.</li>
+                <li><strong>Godspeed</strong> — percepción del agente (antropomorfismo, <em>animacy</em>, simpatía, inteligencia y seguridad percibidas).</li>
+                <li><strong>meCUE</strong> — experiencia de usuario y emociones (alternativa de afecto: PANAS-SF).</li>
+            </ul>
+            <div class="warn"><strong>Manejo de fatiga:</strong> respete el orden contrabalanceado indicado en la tabla de asignación para controlar el efecto de orden. Si detecta fatiga, permita una pausa breve entre instrumentos.</div>
+
+            <h3>4.2 Entrevista Cualitativa Breve</h3>
+            <p>Para profundizar en la percepción de la persona usuaria, realice una entrevista estructurada breve. Solicite permiso para grabar el audio exclusivamente con fines de transcripción. Mantenga las preguntas neutras: no revele la manipulación de <em>embodiment</em> ni el objetivo comparativo.</p>
+
+            <div class="metadata-box">
+                <p><strong>Preguntas de apreciación cualitativa (neutras):</strong></p>
+                <ul>
+                    <li>"En términos generales, ¿cómo describiría su experiencia resolviendo el ejercicio con el asistente el día de hoy?"</li>
+                    <li>"¿Hubo algún momento o detalle que le gustara especialmente?"</li>
+                    <li>"¿Hubo algún aspecto del asistente que le pareciera extraño, incómodo o frustrante?"</li>
+                    <li>"¿Notó alguna característica particular en la forma en que el asistente respondía o se comunicaba?" <em>(Sonda abierta para explorar las diferencias entre condiciones sin revelar el objetivo.)</em></li>
+                    <li>"¿Sintió que el asistente le ayudaba a entender el problema o que solo le ayudaba a completarlo?"</li>
+                    <li>"¿Qué le mejoraría a este asistente?"</li>
+                </ul>
+            </div>
+
+            <h3>4.3 Despedida</h3>
+            <p>Detenga la grabación. Agradezca profundamente el tiempo y la participación.</p>
+            <p><strong>Investigador(a):</strong></p>
+            <div class="quote">"Muchas gracias por ayudarnos a generar conocimiento en esta área. Su aporte ha sido sumamente valioso. ¡Que tenga un excelente día!"</div>
+
+            <h2>5. Gestión Final de Datos y Respaldo</h2>
+            <p>Inmediatamente después de que la persona participante abandone el laboratorio:</p>
+            <ul>
+                <li><strong>Resguardo de logs de la PoC:</strong> verifique que los <em>logs</em> de conversación con el agente se guardaron correctamente bajo el ID de la persona participante, y que el archivo de audio y la grabación de pantalla quedaron asociados al mismo ID.</li>
+                <li><strong>Anonimización por ID de usuario:</strong> confirme que todos los datos, cuestionarios, audios y <em>logs</em> están vinculados únicamente al ID numérico (P01, P02…) y nunca al nombre legal de la persona participante. La tabla que asocia ID con identidad se custodia por separado, cifrada y con acceso restringido al equipo investigador.</li>
+                <li><strong>Almacenamiento seguro:</strong> respalde los <em>logs</em> de la PoC y los demás datos en el repositorio institucional cifrado, conforme a la Ley 8968 de Protección de la Persona frente al Tratamiento de sus Datos Personales y al marco de gobernanza de IA de la UCR.</li>
+                <li><strong>Limpieza:</strong> desinfecte el equipo (teclado, ratón, audífonos) y restablezca la estación con la condición correspondiente al siguiente ID de la lista.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
