@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente de Programación — UCR</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #1e1e1e;
+            --surface:  #252526;
+            --surface2: #2d2d2d;
+            --border:   #3e3e42;
+            --text:     #cccccc;
+            --dim:      #858585;
+            --accent:   #0e639c;
+            --accent-h: #1177bb;
+            --green:    #6fcf97;
+            --green-bg: #1a3a2a;
+            --yellow:   #e2b94b;
+            --yellow-bg:#2d2600;
+            --red:      #f48771;
+            --red-bg:   #3a1a1a;
+            --code-bg:  #1a1a1a;
+            --err-bg:   #5a1d1d;
+            --err-br:   #be1100;
+            --panel-w:  272px;
+        }
+
+        html, body { height: 100%; background: var(--bg); color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; }
+
+        body { display: flex; flex-direction: column; overflow: hidden; }
+
+        /* ── LOGIN / REGISTER ─────────────────────────────────────────────── */
+        #auth-screen {
+            flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px;
+        }
+
+        .card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+            padding: 32px; width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 14px;
+        }
+
+        .card h1 { font-size: 16px; font-weight: 600; }
+        .card p  { font-size: 12px; color: var(--dim); line-height: 1.5; }
+
+        .field { display: flex; flex-direction: column; gap: 5px; }
+        .field label { font-size: 12px; color: var(--dim); }
+
+        input[type="text"], input[type="password"] {
+            width: 100%; padding: 9px 12px; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 4px; color: var(--text); font-size: 14px; outline: none;
+        }
+        input[type="text"]:focus, input[type="password"]:focus { border-color: var(--accent); }
+        input::placeholder { color: var(--dim); }
+
+        .btn { padding: 9px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; transition: background 0.15s; }
+        .btn-primary  { background: var(--accent); color: #fff; }
+        .btn-primary:hover    { background: var(--accent-h); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-link { background: none; color: var(--accent); font-size: 12px; padding: 0; text-align: left; cursor: pointer; }
+        .btn-link:hover { text-decoration: underline; }
+
+        .auth-error { font-size: 12px; color: var(--red); display: none; }
+        .auth-error.show { display: block; }
+
+        /* ── CHAT + PANEL ─────────────────────────────────────────────────── */
+        #chat-screen { display: none; flex: 1; flex-direction: row; overflow: hidden; }
+
+        /* CHAT */
+        #chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        #header {
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            padding: 9px 14px; display: flex; align-items: center; gap: 10px;
+        }
+        #header-title { flex: 1; font-size: 13px; font-weight: 600; }
+        #status { font-size: 11px; background: var(--green-bg); color: var(--green); padding: 2px 10px; border-radius: 20px; }
+        #end-btn {
+            font-size: 11px; padding: 4px 10px; background: transparent;
+            border: 1px solid var(--border); border-radius: 4px; color: var(--dim); cursor: pointer;
+        }
+        #end-btn:hover { border-color: var(--err-br); color: #ff6b6b; }
+        #toggle-panel-btn {
+            font-size: 11px; padding: 4px 8px; background: transparent;
+            border: 1px solid var(--border); border-radius: 4px; color: var(--dim); cursor: pointer;
+        }
+        #toggle-panel-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        #messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+        .msg { max-width: 88%; padding: 9px 13px; border-radius: 8px; line-height: 1.6; word-wrap: break-word; }
+        .msg.user      { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.assistant { background: var(--surface2); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg.error     { background: var(--err-bg); border: 1px solid var(--err-br); align-self: center; max-width: 95%; font-size: 12px; }
+        .msg pre  { background: var(--code-bg); padding: 8px; border-radius: 4px; overflow-x: auto; margin: 6px 0; font-family: 'Consolas','Monaco',monospace; font-size: 12px; }
+        .msg code { background: var(--code-bg); padding: 1px 4px; border-radius: 3px; font-family: 'Consolas','Monaco',monospace; font-size: 12px; }
+        .msg pre code { background: none; padding: 0; }
+
+        #input-bar { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--border); background: var(--surface); }
+        #prompt {
+            flex: 1; padding: 8px 11px; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 4px; color: var(--text); font-family: inherit; font-size: 14px;
+            resize: none; min-height: 36px; max-height: 110px; outline: none;
+        }
+        #prompt:focus { border-color: var(--accent); }
+        #prompt::placeholder { color: var(--dim); }
+        #send { padding: 8px 14px; background: var(--accent); color: #fff; border: none; border-radius: 4px; font-size: 15px; cursor: pointer; align-self: flex-end; }
+        #send:hover    { background: var(--accent-h); }
+        #send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .thinking::after { content: ''; animation: dots 1.5s steps(4,end) infinite; }
+        @keyframes dots { 0%,20%{content:''} 40%{content:'.'} 60%{content:'..'} 80%,100%{content:'...'} }
+        #messages::-webkit-scrollbar { width: 5px; }
+        #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        /* ── PANEL LATERAL ────────────────────────────────────────────────── */
+        #profile-panel {
+            width: var(--panel-w); background: var(--surface); border-left: 1px solid var(--border);
+            display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+            transition: width 0.2s ease;
+        }
+        #profile-panel.collapsed { width: 0; border-left: none; }
+
+        .panel-header {
+            padding: 10px 14px; border-bottom: 1px solid var(--border);
+            font-size: 12px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 6px;
+        }
+        .panel-user { font-size: 11px; color: var(--green); margin-left: auto; }
+
+        .panel-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
+        .panel-body::-webkit-scrollbar { width: 4px; }
+        .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        .panel-section h3 { font-size: 11px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+
+        /* Stats row */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
+        .stat-box .stat-val { font-size: 18px; font-weight: 700; color: var(--text); }
+        .stat-box .stat-lbl { font-size: 10px; color: var(--dim); margin-top: 2px; }
+
+        /* Concept badges */
+        .concept-list { display: flex; flex-direction: column; gap: 6px; }
+        .concept-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 5px; background: var(--surface2); border: 1px solid var(--border); }
+        .concept-name { flex: 1; font-size: 12px; }
+        .badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
+        .badge.dominado      { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green); }
+        .badge.en_progreso   { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow); }
+        .badge.requiere_apoyo{ background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red); }
+
+        .no-concepts { font-size: 12px; color: var(--dim); text-align: center; padding: 12px 0; }
+
+        /* Nivel indicator */
+        .nivel-bar { display: flex; gap: 6px; }
+        .nivel-dot { flex: 1; height: 6px; border-radius: 3px; background: var(--border); transition: background 0.3s; }
+        .nivel-dot.active-1 { background: var(--green); }
+        .nivel-dot.active-2 { background: var(--yellow); }
+        .nivel-dot.active-3 { background: var(--red); }
+
+        /* Session history */
+        .history-item { font-size: 11px; color: var(--dim); padding: 5px 0; border-bottom: 1px solid var(--border); }
+        .history-item:last-child { border-bottom: none; }
+        .history-item strong { color: var(--text); display: block; }
+    </style>
+</head>
+<body>
+
+<!-- ── AUTH ──────────────────────────────────────────────────────────────── -->
+<div id="auth-screen">
+    <!-- LOGIN -->
+    <div class="card" id="login-card">
+        <h1>Asistente de Programación UCR</h1>
+        <p>Iniciá sesión para continuar.</p>
+        <div class="field">
+            <label>Usuario</label>
+            <input type="text" id="login-username" placeholder="Tu usuario" autocomplete="username">
+        </div>
+        <div class="field">
+            <label>Contraseña</label>
+            <input type="password" id="login-password" placeholder="Tu contraseña" autocomplete="current-password">
+        </div>
+        <div class="auth-error" id="login-error"></div>
+        <button class="btn btn-primary" id="login-btn">Iniciar sesión</button>
+        <button class="btn-link" id="go-register">¿Primera vez? Registrate</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="card" id="register-card" style="display:none">
+        <h1>Crear cuenta</h1>
+        <p>Registrate para guardar tu progreso entre sesiones.</p>
+        <div class="field">
+            <label>Usuario</label>
+            <input type="text" id="reg-username" placeholder="Elegí un usuario" autocomplete="username">
+        </div>
+        <div class="field">
+            <label>Contraseña</label>
+            <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+        <div class="auth-error" id="reg-error"></div>
+        <button class="btn btn-primary" id="register-btn">Crear cuenta</button>
+        <button class="btn-link" id="go-login">Ya tengo cuenta</button>
+    </div>
+</div>
+
+<!-- ── CHAT + PANEL ───────────────────────────────────────────────────────── -->
+<div id="chat-screen">
+
+    <!-- CHAT -->
+    <div id="chat-area">
+        <div id="header">
+            <span id="header-title">Asistente de Programación UCR</span>
+            <span id="status">● Activo</span>
+            <button id="toggle-panel-btn" title="Perfil">☰ Perfil</button>
+            <button id="end-btn">Finalizar</button>
+        </div>
+        <div id="messages">
+            <div class="msg assistant">¡Hola! Soy tu asistente de programación. ¿En qué te puedo ayudar?</div>
+        </div>
+        <div id="input-bar">
+            <textarea id="prompt" placeholder="Escribí tu pregunta aquí..." rows="1"></textarea>
+            <button id="send">▶</button>
+        </div>
+    </div>
+
+    <!-- PANEL LATERAL -->
+    <div id="profile-panel">
+        <div class="panel-header">
+            Perfil del Estudiante
+            <span class="panel-user" id="panel-username"></span>
+        </div>
+        <div class="panel-body">
+
+            <div class="panel-section">
+                <h3>Sesión actual</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-val" id="stat-time">0:00</div>
+                        <div class="stat-lbl">Tiempo</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val" id="stat-sticky">0</div>
+                        <div class="stat-lbl">Sticky count</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Nivel de andamiaje</h3>
+                <div class="nivel-bar">
+                    <div class="nivel-dot" id="nd1"></div>
+                    <div class="nivel-dot" id="nd2"></div>
+                    <div class="nivel-dot" id="nd3"></div>
+                </div>
+                <div style="font-size:11px;color:var(--dim);margin-top:6px" id="nivel-label">Sin datos aún</div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Conceptos observados</h3>
+                <div class="concept-list" id="concept-list">
+                    <div class="no-concepts">Aún no hay conceptos registrados</div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Sesiones recientes</h3>
+                <div id="history-list">
+                    <div class="no-concepts">Cargando...</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+// ── ESTADO ───────────────────────────────────────────────────────────────────
+let token      = localStorage.getItem('ucr_token') || null;
+let currentUser= JSON.parse(localStorage.getItem('ucr_user') || 'null');
+let sessionId  = null;
+let history    = [];
+let sessionStart = null;
+let timerInterval= null;
+let panelOpen  = true;
+let conceptsMap= {};
+
+// ── ELEMENTOS ─────────────────────────────────────────────────────────────────
+const authScreen    = document.getElementById('auth-screen');
+const chatScreen    = document.getElementById('chat-screen');
+const loginCard     = document.getElementById('login-card');
+const registerCard  = document.getElementById('register-card');
+const loginBtn      = document.getElementById('login-btn');
+const registerBtn   = document.getElementById('register-btn');
+const loginError    = document.getElementById('login-error');
+const regError      = document.getElementById('reg-error');
+const messagesEl    = document.getElementById('messages');
+const promptEl      = document.getElementById('prompt');
+const sendBtn       = document.getElementById('send');
+const endBtn        = document.getElementById('end-btn');
+const togglePanelBtn= document.getElementById('toggle-panel-btn');
+const profilePanel  = document.getElementById('profile-panel');
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+document.getElementById('go-register').addEventListener('click', () => {
+    loginCard.style.display = 'none'; registerCard.style.display = 'flex';
+});
+document.getElementById('go-login').addEventListener('click', () => {
+    registerCard.style.display = 'none'; loginCard.style.display = 'flex';
+});
+
+document.getElementById('login-username').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+loginBtn.addEventListener('click', doLogin);
+
+async function doLogin() {
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!username || !password) { showAuthError(loginError, 'Completá ambos campos'); return; }
+
+    loginBtn.disabled = true; loginBtn.textContent = 'Ingresando...';
+    try {
+        const res  = await fetch('/api/auth/login', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        token       = data.token;
+        currentUser = { id: data.id, username: data.username };
+        localStorage.setItem('ucr_token', token);
+        localStorage.setItem('ucr_user', JSON.stringify(currentUser));
+        await enterChat();
+    } catch (e) {
+        showAuthError(loginError, e.message);
+        loginBtn.disabled = false; loginBtn.textContent = 'Iniciar sesión';
+    }
+}
+
+document.getElementById('reg-username').addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+document.getElementById('reg-password').addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+registerBtn.addEventListener('click', doRegister);
+
+async function doRegister() {
+    const username = document.getElementById('reg-username').value.trim();
+    const password = document.getElementById('reg-password').value;
+    if (!username || !password) { showAuthError(regError, 'Completá ambos campos'); return; }
+
+    registerBtn.disabled = true; registerBtn.textContent = 'Creando cuenta...';
+    try {
+        const res  = await fetch('/api/auth/register', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        document.getElementById('reg-username').value = '';
+        document.getElementById('reg-password').value = '';
+        document.getElementById('login-username').value = username;
+        registerCard.style.display = 'none'; loginCard.style.display = 'flex';
+        showAuthError(loginError, '¡Cuenta creada! Ahora iniciá sesión.', true);
+    } catch (e) {
+        showAuthError(regError, e.message);
+    } finally {
+        registerBtn.disabled = false; registerBtn.textContent = 'Crear cuenta';
+    }
+}
+
+function showAuthError(el, msg, isOk = false) {
+    el.textContent = msg;
+    el.style.color = isOk ? 'var(--green)' : 'var(--red)';
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+// ── ENTRAR AL CHAT ────────────────────────────────────────────────────────────
+async function enterChat() {
+    authScreen.style.display = 'none';
+    chatScreen.style.display = 'flex';
+    document.getElementById('panel-username').textContent = currentUser.username;
+
+    await loadProfile();
+    await startSession();
+    promptEl.focus();
+}
+
+// ── SESIÓN ────────────────────────────────────────────────────────────────────
+async function startSession() {
+    const res  = await fetch('/api/session/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ participantId: currentUser.username, pathname: window.location.pathname })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    sessionId    = data.sessionId;
+    sessionStart = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+endBtn.addEventListener('click', async () => {
+    if (!confirm('¿Finalizar la sesión?')) return;
+    await endSession();
+});
+
+window.addEventListener('beforeunload', () => {
+    if (sessionId) navigator.sendBeacon('/api/session/end',
+        JSON.stringify({ sessionId }));
+});
+
+async function endSession() {
+    if (!sessionId) return;
+    clearInterval(timerInterval);
+    await fetch('/api/session/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ sessionId })
+    }).catch(() => {});
+
+    sessionId = null; history = [];
+    clearInterval(timerInterval);
+    authScreen.style.display = 'flex';
+    chatScreen.style.display = 'none';
+    messagesEl.innerHTML = '<div class="msg assistant">¡Hola! Soy tu asistente de programación. ¿En qué te puedo ayudar?</div>';
+    conceptsMap = {};
+    token = null; currentUser = null;
+    localStorage.removeItem('ucr_token'); localStorage.removeItem('ucr_user');
+    loginCard.style.display = 'flex'; registerCard.style.display = 'none';
+}
+
+// ── CHAT ──────────────────────────────────────────────────────────────────────
+promptEl.addEventListener('input', () => {
+    promptEl.style.height = 'auto';
+    promptEl.style.height = Math.min(promptEl.scrollHeight, 110) + 'px';
+});
+promptEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+sendBtn.addEventListener('click', sendMessage);
+
+async function sendMessage() {
+    const text = promptEl.value.trim();
+    if (!text || sendBtn.disabled) return;
+
+    addMsg('user', text);
+    promptEl.value = ''; promptEl.style.height = 'auto';
+    sendBtn.disabled = true;
+
+    const loading = document.createElement('div');
+    loading.className = 'msg assistant thinking'; loading.id = 'loading';
+    loading.textContent = 'Pensando'; messagesEl.appendChild(loading); scrollEnd();
+
+    try {
+        const res  = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ message: text, history, sessionId })
+        });
+        const data = await res.json();
+        document.getElementById('loading')?.remove();
+        if (!res.ok) throw new Error(data.error || 'Error del servidor');
+
+        history.push({ role: 'user',      content: text });
+        history.push({ role: 'assistant', content: data.response });
+        addMsg('assistant', data.response);
+
+        // Actualizar panel con datos del servidor
+        if (data.nivel    !== undefined) updateNivelPanel(data.nivel);
+        if (data.stickyCount !== undefined) updateStickyPanel(data.stickyCount);
+        if (data.newConcepts?.length)    updateConceptsLocal(data.newConcepts);
+
+    } catch (e) {
+        document.getElementById('loading')?.remove();
+        addMsg('error', 'Error: ' + e.message);
+    }
+    sendBtn.disabled = false; promptEl.focus();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function addMsg(role, text) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.innerHTML = escapeHtml(text)
+        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+        .replace(/`([^`]+)`/g,  '<code>$1</code>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+    messagesEl.appendChild(div); scrollEnd();
+}
+
+function scrollEnd() { messagesEl.scrollTop = messagesEl.scrollHeight; }
+
+// ── PANEL ─────────────────────────────────────────────────────────────────────
+togglePanelBtn.addEventListener('click', () => {
+    panelOpen = !panelOpen;
+    profilePanel.classList.toggle('collapsed', !panelOpen);
+    togglePanelBtn.textContent = panelOpen ? '☰ Perfil' : '☰';
+});
+
+function updateTimer() {
+    if (!sessionStart) return;
+    const s   = Math.floor((Date.now() - sessionStart) / 1000);
+    const m   = Math.floor(s / 60);
+    const sec = s % 60;
+    document.getElementById('stat-time').textContent = `${m}:${sec.toString().padStart(2,'0')}`;
+}
+
+function updateNivelPanel(nivel) {
+    ['nd1','nd2','nd3'].forEach((id, i) => {
+        const dot = document.getElementById(id);
+        dot.className = 'nivel-dot';
+        if (nivel !== null && (i + 1) <= nivel) dot.classList.add(`active-${nivel}`);
+    });
+    const labels = { 1: 'Nivel 1 — pregunta amplia', 2: 'Nivel 2 — pista conceptual', 3: 'Nivel 3 — ejemplo análogo' };
+    document.getElementById('nivel-label').textContent = nivel ? (labels[nivel] || '') : 'Sin datos';
+}
+
+function updateStickyPanel(count) {
+    document.getElementById('stat-sticky').textContent = count ?? 0;
+}
+
+function updateConceptsLocal(newConcepts) {
+    newConcepts.forEach(c => {
+        if (!c) return;
+        if (conceptsMap[c]) {
+            conceptsMap[c].evidence_count = (conceptsMap[c].evidence_count || 1) + 1;
+            const cnt = conceptsMap[c].evidence_count;
+            conceptsMap[c].state = cnt >= 3 ? 'dominado' : 'en_progreso';
+        } else {
+            conceptsMap[c] = { concept: c, state: 'en_progreso', evidence_count: 1 };
+        }
+    });
+    renderConceptList();
+}
+
+function renderConceptList() {
+    const el    = document.getElementById('concept-list');
+    const items = Object.values(conceptsMap);
+    if (!items.length) { el.innerHTML = '<div class="no-concepts">Aún no hay conceptos registrados</div>'; return; }
+
+    const stateOrder = { dominado: 0, en_progreso: 1, requiere_apoyo: 2 };
+    items.sort((a, b) => stateOrder[a.state] - stateOrder[b.state]);
+
+    const stateLabel = { dominado: 'Dominado', en_progreso: 'En progreso', requiere_apoyo: 'Requiere apoyo' };
+    el.innerHTML = items.map(c => `
+        <div class="concept-item">
+            <span class="concept-name">${escapeHtml(c.concept)}</span>
+            <span class="badge ${c.state}">${stateLabel[c.state]}</span>
+        </div>`).join('');
+}
+
+function renderHistory(sessions) {
+    const el = document.getElementById('history-list');
+    if (!sessions.length) { el.innerHTML = '<div class="no-concepts">Sin sesiones anteriores</div>'; return; }
+    el.innerHTML = sessions.map(s => {
+        const date = new Date(s.started_at).toLocaleDateString('es-CR');
+        const mins = s.duration_minutes ? `${parseFloat(s.duration_minutes).toFixed(0)} min` : '—';
+        return `<div class="history-item"><strong>${date}</strong>${s.mode} · ${mins} · ${s.total_events} eventos</div>`;
+    }).join('');
+}
+
+async function loadProfile() {
+    try {
+        const res  = await fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Conceptos
+        conceptsMap = {};
+        (data.concepts || []).forEach(c => { conceptsMap[c.concept] = c; });
+        renderConceptList();
+
+        // Historial
+        renderHistory(data.recentSessions || []);
+
+        // Nivel y sticky del perfil
+        if (data.profile?.last_scaffold_level) updateNivelPanel(data.profile.last_scaffold_level);
+        if (data.profile?.last_sticky_count !== undefined) updateStickyPanel(data.profile.last_sticky_count);
+    } catch (e) { console.warn('loadProfile:', e.message); }
+}
+
+// ── COPIAS ────────────────────────────────────────────────────────────────────
+document.addEventListener('copy', () => {
+    if (!sessionId) return;
+    const sel  = window.getSelection();
+    if (!sel || sel.isCollapsed) return;
+    const node = sel.getRangeAt(0).commonAncestorContainer;
+    const el   = node.nodeType === 3 ? node.parentElement : node;
+    if (!el.closest('.msg.assistant')) return;
+    fetch('/api/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ sessionId, eventType: 'AGENT_COPY', data: { copiedText: sel.toString(), copiedLength: sel.toString().length } })
+    }).catch(() => {});
+});
+
+// ── AUTO LOGIN si hay token guardado ─────────────────────────────────────────
+if (token && currentUser) {
+    fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } })
+        .then(r => { if (r.ok) enterChat(); else { localStorage.removeItem('ucr_token'); localStorage.removeItem('ucr_user'); } })
+        .catch(() => {});
+}
+</script>
+</body>
+</html>

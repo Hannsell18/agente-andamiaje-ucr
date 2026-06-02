@@ -1,0 +1,16 @@
+{
+  "name": "ucr-ai-research-web-api",
+  "version": "1.0.0",
+  "description": "UCR AI Research Web App - Servidor con Gemini API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.10.0",
+    "dotenv": "^17.4.2",
+    "express": "^4.18.0",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
